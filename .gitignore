@@ -4,3 +4,5 @@
 *.txt
 *.md
 !README.md
+tests/*
+!tests/*.lisp

@@ -93,7 +93,7 @@ impl LispParser {
 
         loop {
             pos = Self::skip_whitespace(trimmed, pos);
-            
+
             if pos >= trimmed.len() {
                 break;
             }
@@ -108,7 +108,6 @@ impl LispParser {
         } else if expressions.len() == 1 {
             Ok(expressions.into_iter().next().unwrap())
         } else {
-            // Multiple expressions - wrap them in a list
             Ok(LispAst::List(expressions))
         }
     }
