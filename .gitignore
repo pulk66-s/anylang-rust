@@ -1,0 +1,6 @@
+/target
+*.ll
+*.o
+*.txt
+*.md
+!README.md

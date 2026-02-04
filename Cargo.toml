@@ -1,0 +1,3 @@
+[workspace]
+members = ["anylang", "lisp-parser", "llvm-backend"]
+resolver = "2"
