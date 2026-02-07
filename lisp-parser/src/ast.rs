@@ -179,8 +179,24 @@ impl TaggedAstParser {
     pub fn parse(&mut self) -> Result<Vec<TaggedAst>, String> {
         println!("CST: {:#?}", self.cst);
         match &self.cst {
-            LispCst::List(l) => self.parse_known_function(&l).map(|ast| vec![ast]),
-            _ => Err("Expected top-level list".to_string()),
+            LispCst::List(l) => {
+                // Check if this is a single expression or multiple top-level expressions
+                if let Some(LispCst::Atom(s)) = l.value.first() {
+                    // If it starts with an atom, it's a single function/operation
+                    if matches!(s.value.as_str(), "defun" | "if" | "+" | "-" | "*" | "/" | "==" | "<" | ">" | "<=" | ">=") {
+                        return self.parse_known_function(&l).map(|ast| vec![ast]);
+                    }
+                }
+                
+                // Otherwise, it's either a function call or multiple top-level expressions
+                // Try to parse all elements as separate top-level expressions
+                let mut results = Vec::new();
+                for elem in &l.value {
+                    results.push(self.parse_elem(elem)?);
+                }
+                Ok(results)
+            },
+            _ => Err("Expected top-level list or expression".to_string()),
         }
     }
 }

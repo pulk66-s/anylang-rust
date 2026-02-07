@@ -24,7 +24,27 @@ impl CstParser {
     }
 
     pub fn parse(&mut self) -> Result<LispCst, String> {
+        // Parse all top-level expressions
+        let mut elements = Vec::new();
+        
+        while self.index < self.tokens.len() {
+            let expr = self.expr()?;
+            elements.push(expr);
+        }
+        
+        // If there's only one expression, return it directly
+        // Otherwise, wrap them in a list
+        if elements.len() == 1 {
+            Ok(elements.into_iter().next().unwrap())
+        } else {
+            Ok(LispCst::List(Spanned::new(elements)))
+        }
+    }
+    
+    fn expr(&mut self) -> Result<LispCst, String> {
         self.list()
+            .or_else(|_| self.atom())
+            .or_else(|_| self.number())
     }
 
     fn list(&mut self) -> Result<LispCst, String> {

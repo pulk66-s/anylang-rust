@@ -24,7 +24,12 @@ pub extern "C" fn parse_logic(input: *const c_char) -> *mut c_char {
     
     let mut logic = Logic::new();
     let result = match logic.parse(&json_value) {
-        Ok(output) => format!("{:?}", output),
+        Ok(output) => {
+            match serde_json::to_string_pretty(&output) {
+                Ok(json) => json,
+                Err(e) => format!("Error serializing IR to JSON: {}", e),
+            }
+        },
         Err(e) => format!("Error parsing logic: {}", e),
     };
 

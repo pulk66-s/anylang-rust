@@ -14,9 +14,9 @@ pub enum CommonIRTag {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CommonOpIR {
-    op: CommonOpTag,
-    left: Box<CommonIRTag>,
-    right: Box<CommonIRTag>,
+    pub op: CommonOpTag,
+    pub left: Box<CommonIRTag>,
+    pub right: Box<CommonIRTag>,
 }
 
 impl CommonOpIR {
@@ -28,11 +28,12 @@ impl CommonOpIR {
         }
     }
 }
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CommonCondIR {
-    cond: Box<CommonIRTag>,
-    then_branch: Vec<CommonIRTag>,
-    else_branch: Vec<CommonIRTag>,
+    pub cond: Box<CommonIRTag>,
+    pub then_branch: Vec<CommonIRTag>,
+    pub else_branch: Vec<CommonIRTag>,
 }
 
 impl CommonCondIR {
@@ -47,13 +48,13 @@ impl CommonCondIR {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct VarDecl {
-    name: String,
+    pub name: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CommonIRFunCall {
-    name: String,
-    args: Vec<CommonIRTag>,
+    pub name: String,
+    pub args: Vec<CommonIRTag>,
 }
 
 impl CommonIRFunCall {
@@ -64,10 +65,10 @@ impl CommonIRFunCall {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CommonIRFunDef {
-    name: String,
-    params: Vec<String>,
-    body: Vec<CommonIRTag>,
-    return_type: Option<String>,
+    pub name: String,
+    pub params: Vec<String>,
+    pub body: Vec<CommonIRTag>,
+    pub return_type: Option<String>,
 }
 
 impl CommonIRFunDef {
