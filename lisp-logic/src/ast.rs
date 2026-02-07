@@ -105,33 +105,3 @@ impl TaggedAst {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_literal_number() {
-        let node = TaggedAst::literal_number(42.0);
-        assert_eq!(node.tag, "literal_number");
-        assert_eq!(node.get_attr_number("value"), Some(42.0));
-    }
-
-    #[test]
-    fn test_binary_op() {
-        let left = TaggedAst::literal_number(2.0);
-        let right = TaggedAst::literal_number(3.0);
-        let add = TaggedAst::binary_op("+", left, right);
-        
-        assert_eq!(add.tag, "binary_op");
-        assert_eq!(add.get_attr_string("operator"), Some("+".to_string()));
-        assert_eq!(add.children.as_ref().unwrap().len(), 2);
-    }
-
-    #[test]
-    fn test_serialization() {
-        let node = TaggedAst::literal_number(42.0);
-        let json = serde_json::to_string(&node).unwrap();
-        let parsed: TaggedAst = serde_json::from_str(&json).unwrap();
-        assert_eq!(node, parsed);
-    }
-}

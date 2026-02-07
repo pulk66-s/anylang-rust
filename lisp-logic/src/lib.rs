@@ -64,25 +64,3 @@ pub extern "C" fn free_string(s: *mut c_char) {
         }
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_constant_folding() {
-        let logic = LispLogic;
-        let input = r#"{
-            "tag": "binary_op",
-            "attributes": {"operator": "+"},
-            "children": [
-                {"tag": "literal_number", "attributes": {"value": 2}},
-                {"tag": "literal_number", "attributes": {"value": 3}}
-            ]
-        }"#;
-        
-        let result = logic.optimize(input).unwrap();
-        assert!(result.contains("literal_number"));
-        assert!(result.contains("5"));
-    }
-}

@@ -26,9 +26,11 @@ pub extern "C" fn parse(input: *const c_char) -> *mut c_char {
     let parser = LispParser::new();
     match parser.parse(input_str) {
         Ok(ast) => {
-            // Serialize AST to JSON for universal backend compatibility
             match serde_json::to_string_pretty(&ast) {
-                Ok(json) => CString::new(json).unwrap().into_raw(),
+                Ok(json) => {
+                    println!("Parsed AST: {}", json);
+                    CString::new(json).unwrap().into_raw()
+                },
                 Err(e) => {
                     let error = format!("ERROR: JSON serialization failed: {}", e);
                     CString::new(error).unwrap().into_raw()

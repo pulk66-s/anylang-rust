@@ -1,6 +1,10 @@
-mod ast;
+mod cst;
 mod ffi;
 mod parser;
+mod span;
+pub mod lexer;
+pub mod ast;
 
-pub use ast::LispAst;
+pub use cst::LispCst;
 pub use parser::LispParser;
+pub use ast::TaggedAstParser;
