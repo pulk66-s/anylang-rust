@@ -1,6 +1,7 @@
 mod backend_loader;
 mod cli;
 mod file_io;
+mod logic_loader;
 mod option;
 mod output;
 mod parser_loader;
@@ -8,6 +9,7 @@ mod parser_loader;
 use backend_loader::{Backend, DynamicBackend};
 use cli::print_usage;
 use file_io::read_file;
+use logic_loader::{DynamicLogic, Logic};
 use output::write_output;
 use parser_loader::{DynamicParser, Parser};
 use std::env;
@@ -83,6 +85,33 @@ fn main() {
         }
     };
 
+    let ir_json = if let Some(logic_path) = &options.logic {
+        println!("\n--- Logic Processing Phase ---");
+        let logic = match DynamicLogic::load(logic_path) {
+            Ok(l) => l,
+            Err(e) => {
+                eprintln!("Failed to load logic library: {}", e);
+                return;
+            }
+        };
+
+        println!("Processing AST through logic layer...");
+        match logic.parse(&ast_json) {
+            Ok(ir) => {
+                println!("Successfully processed!");
+                println!("\nIR (JSON):");
+                println!("{}", ir);
+                ir
+            }
+            Err(e) => {
+                eprintln!("Logic processing error: {}", e);
+                return;
+            }
+        }
+    } else {
+        ast_json.clone()
+    };
+
     if let Some(backend_path) = &options.backend {
         println!("\n--- Compilation Phase ---");
         let backend = match DynamicBackend::load(backend_path) {
@@ -105,7 +134,7 @@ fn main() {
         let output_path = options.output.as_deref().unwrap_or("a.out");
 
         println!("Compiling to: {}", output_path);
-        match backend.compile(&ast_json, output_path) {
+        match backend.compile(&ir_json, output_path) {
             Ok(()) => {
                 println!("\n✓ Compilation successful!");
                 println!("Run with: ./{}", output_path);
@@ -116,8 +145,12 @@ fn main() {
         }
     } else {
         if let Some(output_path) = &options.output {
-            match write_output(output_path, &ast_json) {
-                Ok(_) => println!("\nAST written to: {}", output_path),
+            let output_data = if options.logic.is_some() { &ir_json } else { &ast_json };
+            match write_output(output_path, output_data) {
+                Ok(_) => {
+                    let label = if options.logic.is_some() { "IR" } else { "AST" };
+                    println!("\n{} written to: {}", label, output_path);
+                }
                 Err(e) => eprintln!("{}", e),
             }
         }

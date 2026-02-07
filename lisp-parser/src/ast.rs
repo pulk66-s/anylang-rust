@@ -1,3 +1,4 @@
+use anylang_ir::CommonAstTag;
 use serde::{Deserialize, Serialize};
 
 use crate::{LispCst, cst::CstParser, span::Spanned};
@@ -16,26 +17,8 @@ enum Op {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-enum Tag {
-    FunDef,
-    FunCall,
-    Add,
-    Sub,
-    Mul,
-    Div,
-    Eq,
-    Le,
-    Ge,
-    Lte,
-    Gte,
-    Number,
-    Var,
-    Cond
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Tagged<T> {
-    tag: Tag,
+    tag: CommonAstTag,
     value: T,
 }
 
@@ -102,10 +85,6 @@ impl TaggedAstParser {
         }).collect()
     }
 
-    fn parse_many_body(&self, list: &Spanned<Vec<LispCst>>) -> Result<Vec<TaggedAst>, String> {
-        list.value.iter().map(|e| self.parse_elem(e)).collect()
-    }
-
     fn parse_defun(&self, list: &Spanned<Vec<LispCst>>) -> Result<TaggedAst, String> {
         let values = &list.value;
         let name_atom = values.get(1).ok_or("Expected function name")?;
@@ -123,7 +102,7 @@ impl TaggedAstParser {
                 let body = body_elements.iter().map(|e| self.parse_elem(e)).collect::<Result<Vec<_>, _>>()?;
 
                 Ok(TaggedAst::FunDef(Tagged {
-                    tag: Tag::FunDef,
+                    tag: CommonAstTag::FunDef,
                     value: FuncDef { 
                         name: name.value.clone(),
                         params: self.ensure_names(&params.value)?, 
@@ -139,15 +118,15 @@ impl TaggedAstParser {
         let ast_args = self.parse_all(args)?;
 
         match sign {
-            "+" => Ok(TaggedAst::Add(Tagged { tag: Tag::Add, value: OpCall { op: Op::Add, args: ast_args } })),
-            "-" => Ok(TaggedAst::Sub(Tagged { tag: Tag::Sub, value: OpCall { op: Op::Sub, args: ast_args } })),
-            "*" => Ok(TaggedAst::Mul(Tagged { tag: Tag::Mul, value: OpCall { op: Op::Mul, args: ast_args } })),
-            "/" => Ok(TaggedAst::Div(Tagged { tag: Tag::Div, value: OpCall { op: Op::Div, args: ast_args } })),
-            "==" => Ok(TaggedAst::Eq(Tagged { tag: Tag::Eq, value: OpCall { op: Op::Eq, args: ast_args } })),
-            "<" => Ok(TaggedAst::Le(Tagged { tag: Tag::Le, value: OpCall { op: Op::Le, args: ast_args } })),
-            ">" => Ok(TaggedAst::Ge(Tagged { tag: Tag::Ge, value: OpCall { op: Op::Ge, args: ast_args } })),
-            "<=" => Ok(TaggedAst::Lte(Tagged { tag: Tag::Lte, value: OpCall { op: Op::Lte, args: ast_args } })),
-            ">=" => Ok(TaggedAst::Gte(Tagged { tag: Tag::Gte, value: OpCall { op: Op::Gte, args: ast_args } })),
+            "+" => Ok(TaggedAst::Add(Tagged { tag: CommonAstTag::Add, value: OpCall { op: Op::Add, args: ast_args } })),
+            "-" => Ok(TaggedAst::Sub(Tagged { tag: CommonAstTag::Sub, value: OpCall { op: Op::Sub, args: ast_args } })),
+            "*" => Ok(TaggedAst::Mul(Tagged { tag: CommonAstTag::Mul, value: OpCall { op: Op::Mul, args: ast_args } })),
+            "/" => Ok(TaggedAst::Div(Tagged { tag: CommonAstTag::Div, value: OpCall { op: Op::Div, args: ast_args } })),
+            "==" => Ok(TaggedAst::Eq(Tagged { tag: CommonAstTag::Eq, value: OpCall { op: Op::Eq, args: ast_args } })),
+            "<" => Ok(TaggedAst::Le(Tagged { tag: CommonAstTag::Le, value: OpCall { op: Op::Le, args: ast_args } })),
+            ">" => Ok(TaggedAst::Ge(Tagged { tag: CommonAstTag::Ge, value: OpCall { op: Op::Ge, args: ast_args } })),
+            "<=" => Ok(TaggedAst::Lte(Tagged { tag: CommonAstTag::Lte, value: OpCall { op: Op::Lte, args: ast_args } })),
+            ">=" => Ok(TaggedAst::Gte(Tagged { tag: CommonAstTag::Gte, value: OpCall { op: Op::Gte, args: ast_args } })),
             e => Err(format!("Unknown operator: {}", e)),
         }
     }
@@ -160,7 +139,7 @@ impl TaggedAstParser {
         let else_branch = self.parse_elem(values.get(3).ok_or("Expected else branch")?)?;
 
         Ok(TaggedAst::Cond(Tagged {
-            tag: Tag::Cond,
+            tag: CommonAstTag::Cond,
             value: Cond { cond: Box::new(cond), then_branch: vec![then_branch], else_branch: vec![else_branch] },
         }))
     }
@@ -195,7 +174,7 @@ impl TaggedAstParser {
         let ast_args = self.parse_all(&args[1..].to_vec())?;
 
         Ok(TaggedAst::FunCall(Tagged {
-            tag: Tag::FunCall,
+            tag: CommonAstTag::FunCall,
             value: FunCall { name, args: ast_args },
         }))
     }
@@ -204,8 +183,8 @@ impl TaggedAstParser {
         println!("Parsing element: {:?}", elem);
         match elem {
             LispCst::List(l) => self.parse_known_function(l).or(self.parse_func_call(&l.value)),
-            LispCst::Atom(s) => Ok(TaggedAst::Var(Tagged { tag: Tag::Var, value: s.value.clone() })),
-            LispCst::Number(n) => Ok(TaggedAst::Number(Tagged { tag: Tag::Number, value: n.value })),
+            LispCst::Atom(s) => Ok(TaggedAst::Var(Tagged { tag: CommonAstTag::Var, value: s.value.clone() })),
+            LispCst::Number(n) => Ok(TaggedAst::Number(Tagged { tag: CommonAstTag::Number, value: n.value })),
             _ => Err(format!("Unexpected CST node: {:?}", elem)),
         }
     }
