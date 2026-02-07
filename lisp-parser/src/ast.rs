@@ -1,20 +1,7 @@
-use anylang_ir::CommonAstTag;
+use anylang_ir::{CommonAstTag, CommonOpTag};
 use serde::{Deserialize, Serialize};
 
 use crate::{LispCst, cst::CstParser, span::Spanned};
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-enum Op {
-    Add,
-    Sub,
-    Mul,
-    Div,
-    Eq,
-    Le,
-    Ge,
-    Lte,
-    Gte,
-}
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Tagged<T> {
@@ -31,7 +18,7 @@ pub struct FuncDef {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct OpCall {
-    op: Op,
+    op: CommonOpTag,
     args: Vec<TaggedAst>,
 }
 
@@ -118,15 +105,15 @@ impl TaggedAstParser {
         let ast_args = self.parse_all(args)?;
 
         match sign {
-            "+" => Ok(TaggedAst::Add(Tagged { tag: CommonAstTag::Add, value: OpCall { op: Op::Add, args: ast_args } })),
-            "-" => Ok(TaggedAst::Sub(Tagged { tag: CommonAstTag::Sub, value: OpCall { op: Op::Sub, args: ast_args } })),
-            "*" => Ok(TaggedAst::Mul(Tagged { tag: CommonAstTag::Mul, value: OpCall { op: Op::Mul, args: ast_args } })),
-            "/" => Ok(TaggedAst::Div(Tagged { tag: CommonAstTag::Div, value: OpCall { op: Op::Div, args: ast_args } })),
-            "==" => Ok(TaggedAst::Eq(Tagged { tag: CommonAstTag::Eq, value: OpCall { op: Op::Eq, args: ast_args } })),
-            "<" => Ok(TaggedAst::Le(Tagged { tag: CommonAstTag::Le, value: OpCall { op: Op::Le, args: ast_args } })),
-            ">" => Ok(TaggedAst::Ge(Tagged { tag: CommonAstTag::Ge, value: OpCall { op: Op::Ge, args: ast_args } })),
-            "<=" => Ok(TaggedAst::Lte(Tagged { tag: CommonAstTag::Lte, value: OpCall { op: Op::Lte, args: ast_args } })),
-            ">=" => Ok(TaggedAst::Gte(Tagged { tag: CommonAstTag::Gte, value: OpCall { op: Op::Gte, args: ast_args } })),
+            "+" => Ok(TaggedAst::Add(Tagged { tag: CommonAstTag::Add, value: OpCall { op: CommonOpTag::Add, args: ast_args } })),
+            "-" => Ok(TaggedAst::Sub(Tagged { tag: CommonAstTag::Sub, value: OpCall { op: CommonOpTag::Sub, args: ast_args } })),
+            "*" => Ok(TaggedAst::Mul(Tagged { tag: CommonAstTag::Mul, value: OpCall { op: CommonOpTag::Mul, args: ast_args } })),
+            "/" => Ok(TaggedAst::Div(Tagged { tag: CommonAstTag::Div, value: OpCall { op: CommonOpTag::Div, args: ast_args } })),
+            "==" => Ok(TaggedAst::Eq(Tagged { tag: CommonAstTag::Eq, value: OpCall { op: CommonOpTag::Eq, args: ast_args } })),
+            "<" => Ok(TaggedAst::Le(Tagged { tag: CommonAstTag::Le, value: OpCall { op: CommonOpTag::Lt, args: ast_args } })),
+            ">" => Ok(TaggedAst::Ge(Tagged { tag: CommonAstTag::Ge, value: OpCall { op: CommonOpTag::Gt, args: ast_args } })),
+            "<=" => Ok(TaggedAst::Lte(Tagged { tag: CommonAstTag::Lte, value: OpCall { op: CommonOpTag::Lte, args: ast_args } })),
+            ">=" => Ok(TaggedAst::Gte(Tagged { tag: CommonAstTag::Gte, value: OpCall { op: CommonOpTag::Gte, args: ast_args } })),
             e => Err(format!("Unknown operator: {}", e)),
         }
     }

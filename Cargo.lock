@@ -108,7 +108,7 @@ dependencies = [
 name = "lisp-logic"
 version = "0.1.0"
 dependencies = [
- "lisp-parser",
+ "anylang-ir",
  "serde",
  "serde_json",
 ]

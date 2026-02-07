@@ -10,9 +10,8 @@ pub extern "C" fn parse_logic(input: *const c_char) -> *mut c_char {
         }
         CStr::from_ptr(input).to_str().unwrap_or("")
     };
-    
-    // Input is already JSON (AST from parser), so parse it directly
-    let json_value = match serde_json::from_str(input_str) {
+
+    let json_value: serde_json::Value = match serde_json::from_str(input_str) {
         Ok(v) => v,
         Err(e) => {
             let error_msg = format!("Error parsing JSON: {}", e);
@@ -23,10 +22,10 @@ pub extern "C" fn parse_logic(input: *const c_char) -> *mut c_char {
         }
     };
     
-    let logic = Logic::new();
-    let result = match logic.parse(json_value) {
-        Ok(output) => output,
-        Err(e) => format!("Error: {}", e),
+    let mut logic = Logic::new();
+    let result = match logic.parse(&json_value) {
+        Ok(output) => format!("{:?}", output),
+        Err(e) => format!("Error parsing logic: {}", e),
     };
 
     match CString::new(result) {
