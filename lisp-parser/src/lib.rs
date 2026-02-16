@@ -6,5 +6,5 @@ pub mod lexer;
 pub mod ast;
 
 pub use cst::LispCst;
-pub use parser::LispParser;
+pub use parser::{LispParser, LispAst};
 pub use ast::TaggedAstParser;
