@@ -1,12 +1,11 @@
 use crate::span::{Span, Spanned};
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub enum Lexer {
     Atom(Spanned<String>),
     Number(Spanned<f64>),
     LPar(Span),
     RPar(Span),
-    Dot(Span),
 }
 
 pub struct LexerParser<'a> {
@@ -50,17 +49,6 @@ impl<'a> LexerParser<'a> {
             None => Ok(None),
             Some(&'(') => Ok(Some(self.parse_lpar()?)),
             Some(&')') => Ok(Some(self.parse_rpar()?)),
-            Some(&'.') => {
-                // Check if this is a dot token (followed by whitespace/paren) or part of a number
-                let mut temp_input = self.input.clone();
-                temp_input.next(); // skip the dot
-                match temp_input.peek() {
-                    Some(&c) if c.is_whitespace() || c == '(' || c == ')' => {
-                        Ok(Some(self.parse_dot()?))
-                    }
-                    _ => Ok(Some(self.parse_atom()?))
-                }
-            }
             Some(&c) if c.is_digit(10) => {
                 Ok(Some(self.parse_number()?))
             }
@@ -72,13 +60,6 @@ impl<'a> LexerParser<'a> {
         match self.input.next_if(|&c| c == '(') {
             Some(_) => Ok(Lexer::LPar(self.new_span(1))),
             None => Err("Expected '('".to_string()),
-        }
-    }
-
-    fn parse_dot(&mut self) -> Result<Lexer, String> {
-        match self.input.next_if(|&c| c == '.') {
-            Some(_) => Ok(Lexer::Dot(self.new_span(1))),
-            None => Err("Expected '.'".to_string()),
         }
     }
 
